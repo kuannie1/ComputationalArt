@@ -2,7 +2,7 @@
 
 import random
 from PIL import Image
-
+import math
 
 def build_random_function(min_depth, max_depth):
     """ Builds a random function of depth at least min_depth and depth
@@ -15,8 +15,39 @@ def build_random_function(min_depth, max_depth):
                  (see assignment writeup for details on the representation of
                  these functions)
     """
-    # TODO: implement this
-    pass
+    result = []
+    first_inputs = [["x"], ["y"]]
+    first_input = random.choice(first_inputs) #depending on the 1st function, I think
+    #depth = random.randrange(min_depth, max_depth)
+
+    list_of_functions = ["prod", "avg", "cos_pi", "sin_pi", "x", "y"]
+    first_function = random.choice(list_of_functions)
+
+
+    if min_depth > 1:
+    	if first_function in ["prod", "avg"]:
+	    	result.append(first_function)
+	    	result.append(build_random_function(min_depth - 1, max_depth - 1))
+	    	result.append(build_random_function(min_depth - 1, max_depth - 1))
+    	elif first_function in ["cos_pi", "sin_pi", "x", "y"]:
+    		result.append(first_function)
+    		result.append(build_random_function(min_depth - 1, max_depth - 1))
+    elif ((min_depth == 1) and (max_depth > 1)) or ((min_depth < 1) and (max_depth > 1)):
+    	if first_function in ["prod", "avg"]:
+    		result.append(first_function)
+    		result.append(build_random_function(1, max_depth - 1))
+    		result.append(build_random_function(1, max_depth - 1))
+    	elif first_function in ["cos_pi", "sin_pi", "x", "y"]:
+    		result.append(first_function)
+    		result.append(build_random_function(1, max_depth - 1))
+    else: #probably when max_depth reaches 1
+     	if first_function in ["prod", "avg"]:
+		   	result.append(first_function)
+			result.append(first_inputs)
+     	if first_function in ["cos_pi", "sin_pi", "x", "y"]:
+			result.append(first_function)
+			result.append(first_input)
+    return result
 
 
 def evaluate_random_function(f, x, y):
@@ -33,6 +64,20 @@ def evaluate_random_function(f, x, y):
         >>> evaluate_random_function(["y"],0.1,0.02)
         0.02
     """
+    if f[0] == 'x':
+    	return x
+    if f[0] == 'y':
+    	return y
+    if f[0] == 'sin_pi':
+    	return math.sin(evaluate_random_function(f[1], x, y))
+    if f[0] == 'cos_pi':
+    	return math.sin(evaluate_random_function(f[1], x, y))
+    if f[0] == 'avg':
+    	return ((evaluate_random_function(f[1], x, y) + evaluate_random_function(f[2], x, y))/2)
+    if f[0] == 'prod':
+    	return (evaluate_random_function(f[1], x, y) * evaluate_random_function(f[2], x, y))
+    else:
+    	return 'Try again?'
     # TODO: implement this
     pass
 
@@ -64,6 +109,24 @@ def remap_interval(val,
         >>> remap_interval(5, 4, 6, 1, 2)
         1.5
     """
+    if (val > input_interval_start) and (val < input_interval_end):
+    	input_range = float(input_interval_end - input_interval_start)
+    	input_proportion_numerator = float(val - input_interval_start)
+    	input_ratio = float(input_proportion_numerator/input_range)
+
+    	output_range = output_interval_end - output_interval_start
+    	output_addon = float(output_range * input_ratio)
+    	new_val = output_interval_start + output_addon
+    elif val == input_interval_start:
+    	new_val = output_interval_start
+    elif val == input_interval_end:
+    	new_val = output_interval_end
+    else:
+    	new_val = 0
+
+    return new_val
+    
+    
     # TODO: implement this
     pass
 
@@ -116,9 +179,9 @@ def generate_art(filename, x_size=350, y_size=350):
         x_size, y_size: optional args to set image dimensions (default: 350)
     """
     # Functions for red, green, and blue channels - where the magic happens!
-    red_function = ["x"]
-    green_function = ["y"]
-    blue_function = ["x"]
+    red_function = build_random_function(2, 6)
+    green_function = build_random_function(7, 9)
+    blue_function = build_random_function(7, 9)
 
     # Create image and loop over all pixels
     im = Image.new("RGB", (x_size, y_size))
@@ -134,6 +197,12 @@ def generate_art(filename, x_size=350, y_size=350):
                     )
 
     im.save(filename)
+    print 'The red_function is:'
+    print red_function
+    print 'The green_function is'
+    print green_function
+    print 'The blue_function is'
+    print blue_function
 
 
 if __name__ == '__main__':
@@ -143,8 +212,10 @@ if __name__ == '__main__':
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-    # generate_art("myart.png")
+    generate_art("myart2.png")
 
     # Test that PIL is installed correctly
     # TODO: Comment or remove this function call after testing PIL install
-    test_image("noise.png")
+    #test_image("noise.png")
+
+
