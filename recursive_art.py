@@ -15,40 +15,38 @@ def build_random_function(min_depth, max_depth):
                  (see assignment writeup for details on the representation of
                  these functions)
     """
-    result = []
     first_inputs = [["x"], ["y"]]
     first_input = random.choice(first_inputs) #depending on the 1st function, I think
     #depth = random.randrange(min_depth, max_depth)
 
-    list_of_functions = ["prod", "avg", "cos_pi", "sin_pi", "x", "y"]
+    list_of_functions = ["prod", "avg", "cos_pi", "sin_pi", "x", "y", "x^3", "y^3"]
     first_function = random.choice(list_of_functions)
 
-
-    if min_depth > 1:
+    if max_depth == min_depth:
+    	return first_input
+    else:
     	if first_function in ["prod", "avg"]:
-	    	result.append(first_function)
-	    	result.append(build_random_function(min_depth - 1, max_depth - 1))
-	    	result.append(build_random_function(min_depth - 1, max_depth - 1))
-    	elif first_function in ["cos_pi", "sin_pi", "x", "y"]:
-    		result.append(first_function)
-    		result.append(build_random_function(min_depth - 1, max_depth - 1))
-    elif ((min_depth == 1) and (max_depth > 1)) or ((min_depth < 1) and (max_depth > 1)):
-    	if first_function in ["prod", "avg"]:
-    		result.append(first_function)
-    		result.append(build_random_function(1, max_depth - 1))
-    		result.append(build_random_function(1, max_depth - 1))
-    	elif first_function in ["cos_pi", "sin_pi", "x", "y"]:
-    		result.append(first_function)
-    		result.append(build_random_function(1, max_depth - 1))
-    else: #probably when max_depth reaches 1
-     	if first_function in ["prod", "avg"]:
-		   	result.append(first_function)
-			result.append(first_inputs)
-     	if first_function in ["cos_pi", "sin_pi", "x", "y"]:
-			result.append(first_function)
-			result.append(first_input)
-    return result
+    		return [first_function, build_random_function(min_depth, max_depth - 1), build_random_function(min_depth, max_depth - 1)]
+	    	
+    	else:
+    		return [first_function, build_random_function(min_depth, max_depth - 1)]
 
+
+   #  elif ((min_depth == 1) and (max_depth > 1)) or ((min_depth < 1) and (max_depth > 1)):
+   #  	if first_function in ["prod", "avg"]:
+   #  		result.append(first_function)
+   #  		result.append(build_random_function(1, max_depth - 1))
+   #  		result.append(build_random_function(1, max_depth - 1))
+   #  	elif first_function in ["cos_pi", "sin_pi", "x", "y"]:
+   #  		result.append(first_function)
+   #  		result.append(build_random_function(1, max_depth - 1))
+   #  else: #probably when max_depth reaches 1
+   #   	if first_function in ["prod", "avg"]:
+		 #   	result.append(first_function)
+			# result.append(first_inputs)
+   #   	if first_function in ["cos_pi", "sin_pi", "x", "y"]:
+			# result.append(first_function)
+			# result.append(first_input)
 
 def evaluate_random_function(f, x, y):
     """ Evaluate the random function f with inputs x,y
@@ -66,21 +64,24 @@ def evaluate_random_function(f, x, y):
     """
     if f[0] == 'x':
     	return x
-    if f[0] == 'y':
+    elif f[0] == 'y':
     	return y
-    if f[0] == 'sin_pi':
-    	return math.sin(evaluate_random_function(f[1], x, y))
-    if f[0] == 'cos_pi':
-    	return math.sin(evaluate_random_function(f[1], x, y))
-    if f[0] == 'avg':
-    	return ((evaluate_random_function(f[1], x, y) + evaluate_random_function(f[2], x, y))/2)
-    if f[0] == 'prod':
+    elif f[0] == 'x^3':
+    	return x**3
+    elif f[0] == 'y^3':
+    	return y**3
+    elif f[0] == 'sin_pi':
+    	return math.sin(math.pi * evaluate_random_function(f[1], x, y))
+    elif f[0] == 'cos_pi':
+    	return math.sin(math.pi * evaluate_random_function(f[1], x, y))
+    elif f[0] == 'avg':
+    	return ((evaluate_random_function(f[1], x, y) + evaluate_random_function(f[2], x, y))/2.0)
+    elif f[0] == 'prod':
     	return (evaluate_random_function(f[1], x, y) * evaluate_random_function(f[2], x, y))
+    # elif f[0] == 'sin10xy':
+    # 	return (math.sin(math.pi * 10.0 * evaluate_random_function(f[1], x, y) * evaluate_random_function(f[2], x, y)))
     else:
-    	return 'Try again?'
-    # TODO: implement this
-    pass
-
+    	raise ValueError
 
 def remap_interval(val,
                    input_interval_start,
@@ -126,10 +127,6 @@ def remap_interval(val,
 
     return new_val
     
-    
-    # TODO: implement this
-    pass
-
 
 def color_map(val):
     """ Maps input value between -1 and 1 to an integer 0-255, suitable for
@@ -179,9 +176,9 @@ def generate_art(filename, x_size=350, y_size=350):
         x_size, y_size: optional args to set image dimensions (default: 350)
     """
     # Functions for red, green, and blue channels - where the magic happens!
-    red_function = build_random_function(2, 6)
-    green_function = build_random_function(7, 9)
-    blue_function = build_random_function(7, 9)
+    red_function = build_random_function(2, 11)
+    green_function = build_random_function(2, 11)
+    blue_function = build_random_function(2, 11)
 
     # Create image and loop over all pixels
     im = Image.new("RGB", (x_size, y_size))
@@ -212,7 +209,7 @@ if __name__ == '__main__':
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-    generate_art("myart2.png")
+    generate_art("myart.png")
 
     # Test that PIL is installed correctly
     # TODO: Comment or remove this function call after testing PIL install
